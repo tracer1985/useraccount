@@ -1,0 +1,24 @@
+---
+- name: Check status of services
+  hosts: all
+  gather_facts: no
+  vars:
+    services_to_check:
+      - sshd
+      - nginx
+      - docker
+
+  tasks:
+    - name: Check if service is running
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+      check_mode: yes
+      register: service_check
+      loop: "{{ services_to_check }}"
+      ignore_errors: yes
+
+    - name: Print service status
+      debug:
+        msg: "Service {{ item.item }}: {{ 'RUNNING' if item.changed == False else 'NOT RUNNING' }}"
+      loop: "{{ service_check.results }}"
