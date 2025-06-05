@@ -26,6 +26,6 @@
     - name: Allow user passwordless sudo via visudo
       ansible.builtin.lineinfile:
         dest: /etc/sudoers.d/{{ username }}
-        line: '{{ username }} ALL=(ALL) NOPASSWD:ALL'
+        line: '{{ username }} ALL=(ALL:ALL) ALL'
         create: yes
         mode: '0440'
