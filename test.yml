@@ -3,7 +3,7 @@
   hosts: all
   become: true
   vars:
-    username: jumpman
+    username: kurimaw
     password_clear: "test1"
   tasks:
     - name: Generate password hash
