@@ -23,7 +23,7 @@
         create: yes
         mode: '0440'
 
-    - name: Allow user passwordless sudo via visudo
+    - name: Allow user sudo via visudo
       ansible.builtin.lineinfile:
         dest: /etc/sudoers.d/{{ username }}
         line: '{{ username }} ALL=(ALL:ALL) ALL'
