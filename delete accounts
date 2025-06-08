@@ -1,0 +1,16 @@
+---
+- name: Delete specified users from Linux systems
+  hosts: all
+  become: yes
+  vars:
+    users_to_delete:
+      - kamote1
+      - kamote2
+      - kamote6
+  tasks:
+    - name: Remove user accounts and their home directories
+      user:
+        name: "{{ item }}"
+        state: absent
+        remove: yes
+      loop: "{{ users_to_delete }}"
