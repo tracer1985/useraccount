@@ -1,20 +1,20 @@
 ---
-- name: Create multiple users, set passwords, and grant sudo privileges
+- name: Create multiple users with high-security passwords and grant sudo privileges
   hosts: all
   become: true
   vars:
     users:
-      - { username: kurimaw, password_clear: "test1" }
-      - { username: alice,   password_clear: "alicepass" }
-      - { username: bob,     password_clear: "bobpass" }
-      - { username: eve,     password_clear: "evepass" }
+      - { username: kurimaw, password_clear: "!T3st1nG#2025Kuri" }
+      - { username: alice,   password_clear: "S@f3P@55w0rd#Alice9" }
+      - { username: bob,     password_clear: "Str0ng!Bob$2025" }
+      - { username: eve,     password_clear: "Ev3#Secr3t*2025" }
   tasks:
     - name: Generate password hashes for all users
       ansible.builtin.set_fact:
         user_hashes: "{{ user_hashes | default({}) | combine({ item.username: (item.password_clear | password_hash('sha512')) }) }}"
       loop: "{{ users }}"
 
-    - name: Ensure all users exist with specified passwords
+    - name: Ensure all users exist with specified high-security passwords
       ansible.builtin.user:
         name: "{{ item.username }}"
         password: "{{ user_hashes[item.username] }}"
@@ -31,7 +31,7 @@
 
     - name: Allow users sudo via visudo (with password)
       ansible.builtin.lineinfile:
-        dest: /etc/sudoers.d/{{ item.username }}"
+        dest: /etc/sudoers.d/{{ item.username }}
         line: '{{ item.username }} ALL=(ALL:ALL) ALL'
         create: yes
         mode: '0440'
