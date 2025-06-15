@@ -13,12 +13,7 @@
       - username: eve
         password_clear: "evePwd!2025"
   tasks:
-    - name: Ensure passlib is available (for password hashing)
-      pip:
-        name: passlib
-        state: present
-
-    - name: Generate password hashes for all users using passlib
+    - name: Generate password hashes for all users using passlib (community.general collection required)
       ansible.builtin.set_fact:
         user_hashes: "{{ user_hashes | default({}) | combine({ item.username: (item.password_clear | community.general.password_hash('sha512')) }) }}"
       loop: "{{ users }}"
