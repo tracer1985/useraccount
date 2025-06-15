@@ -1,23 +1,32 @@
 ---
-- name: Create multiple users with static password and grant sudo privileges
+- name: Create multiple user accounts in Linux with individual passwords
   hosts: all
   become: true
   vars:
     users:
-      - username: kamote11
-      - username: kamote12
-      - username: bob13
-      - username: gmail14
-    password_clear: "test123"
+      - username: kurimaw
+        password_clear: "kuriTest@2025"
+      - username: alice
+        password_clear: "alicePass#2025"
+      - username: bob
+        password_clear: "bobSecure$2025"
+      - username: eve
+        password_clear: "evePwd!2025"
   tasks:
-    - name: Generate password hash using passlib for static password
-      ansible.builtin.set_fact:
-        password_hash: "{{ password_clear | community.general.password_hash('sha512') }}"
+    - name: Ensure passlib is available (for password hashing)
+      pip:
+        name: passlib
+        state: present
 
-    - name: Ensure all users exist with specified static password
+    - name: Generate password hashes for all users using passlib
+      ansible.builtin.set_fact:
+        user_hashes: "{{ user_hashes | default({}) | combine({ item.username: (item.password_clear | community.general.password_hash('sha512')) }) }}"
+      loop: "{{ users }}"
+
+    - name: Ensure all users exist with their individual passwords
       ansible.builtin.user:
         name: "{{ item.username }}"
-        password: "{{ password_hash }}"
+        password: "{{ user_hashes[item.username] }}"
         shell: /bin/bash
       loop: "{{ users }}"
 
