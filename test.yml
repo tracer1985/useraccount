@@ -4,10 +4,10 @@
   become: true
   vars:
     users:
-      - username: kurimaw
-      - username: alice
-      - username: bob
-      - username: eve
+      - username: kamote11
+      - username: kamote12
+      - username: bob13
+      - username: gmail14
     password_clear: "test123"
   tasks:
     - name: Generate password hash using passlib for static password
