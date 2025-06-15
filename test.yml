@@ -1,31 +1,42 @@
 ---
-- name: Create user, set password, and grant sudo privileges
+- name: Create multiple user accounts in Linux
   hosts: all
   become: true
   vars:
-    username: powerpuff
-    password_clear: "test1"
+    users:
+      - username: jake100
+        password_clear: "kuriTest@2025"
+      - username: alice
+        password_clear: "alicePass#2025"
+      - username: bob
+        password_clear: "bobSecure$2025"
+      - username: eve
+        password_clear: "evePwd!2025"
   tasks:
-    - name: Generate password hash
+    - name: Generate password hashes for all users
       ansible.builtin.set_fact:
-        password_hash: "{{ password_clear | password_hash('sha512') }}"
+        user_hashes: "{{ user_hashes | default({}) | combine({ item.username: (item.password_clear | password_hash('sha512')) }) }}"
+      loop: "{{ users }}"
 
-    - name: Ensure user exists with specified password
+    - name: Ensure all users exist with their individual passwords
       ansible.builtin.user:
-        name: "{{ username }}"
-        password: "{{ password_hash }}"
+        name: "{{ item.username }}"
+        password: "{{ user_hashes[item.username] }}"
         shell: /bin/bash
+      loop: "{{ users }}"
 
-    - name: Allow user passwordless sudo via visudo
+    - name: Allow users passwordless sudo via visudo
       ansible.builtin.lineinfile:
-        dest: /etc/sudoers.d/{{ username }}
-        line: '{{ username }} ALL=(ALL) NOPASSWD:ALL'
+        dest: /etc/sudoers.d/{{ item.username }}
+        line: '{{ item.username }} ALL=(ALL) NOPASSWD:ALL'
         create: yes
         mode: '0440'
+      loop: "{{ users }}"
 
-    - name: Allow user sudo via visudo (with password)
+    - name: Allow users sudo via visudo (with password)
       ansible.builtin.lineinfile:
-        dest: /etc/sudoers.d/{{ username }}
-        line: '{{ username }} ALL=(ALL:ALL) ALL'
+        dest: /etc/sudoers.d/{{ item.username }}
+        line: '{{ item.username }} ALL=(ALL:ALL) ALL'
         create: yes
         mode: '0440'
+      loop: "{{ users }}"
