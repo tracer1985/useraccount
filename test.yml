@@ -1,23 +1,23 @@
 ---
-- name: Create multiple users with high-security passwords and grant sudo privileges
+- name: Create multiple users with static password and grant sudo privileges
   hosts: all
   become: true
   vars:
     users:
-      - { username: kurimaw, password_clear: "!T3st1nG#2025Kuri" }
-      - { username: alice,   password_clear: "S@f3P@55w0rd#Alice9" }
-      - { username: bob,     password_clear: "Str0ng!Bob$2025" }
-      - { username: eve,     password_clear: "Ev3#Secr3t*2025" }
+      - username: kurimaw
+      - username: alice
+      - username: bob
+      - username: eve
+    password_clear: "test123"
   tasks:
-    - name: Generate password hashes for all users
+    - name: Generate password hash using passlib for static password
       ansible.builtin.set_fact:
-        user_hashes: "{{ user_hashes | default({}) | combine({ item.username: (item.password_clear | password_hash('sha512')) }) }}"
-      loop: "{{ users }}"
+        password_hash: "{{ password_clear | community.general.password_hash('sha512') }}"
 
-    - name: Ensure all users exist with specified high-security passwords
+    - name: Ensure all users exist with specified static password
       ansible.builtin.user:
         name: "{{ item.username }}"
-        password: "{{ user_hashes[item.username] }}"
+        password: "{{ password_hash }}"
         shell: /bin/bash
       loop: "{{ users }}"
 
